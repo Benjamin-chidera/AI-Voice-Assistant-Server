@@ -1,0 +1,13 @@
+passlib
+bcrypt==4.0.1
+python-multipart
+"python-jose[cryptography]"
+pymysql
+python-dotenv
+sqlalchemy
+faster-whisper
+langchain
+langchain-community
+langgraph
+langchain-openai
+langchain-ollama
