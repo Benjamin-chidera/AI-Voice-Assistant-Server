@@ -46,9 +46,8 @@ async def communicate(
     segments, _ = model.transcribe(audio_stream)
     user_text = " ".join([seg.text for seg in segments])
 
-    print("Transcribed user_text:", user_text)
-    
-    ai_response, speech_response = await speak_to_llm(user_text, voice=user_voice.voice) # type: ignore
+    # print("Transcribed user_text:", user_text)    
+    ai_response, speech_response = await speak_to_llm(user_text, voice=user_voice.voice, language=user_voice.echo_language_output) # type: ignore
 
     return {"user_text": user_text,
             "ai_response": ai_response,
@@ -65,7 +64,9 @@ async def chat_with_llm(
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
     
-    ai_chat = await chat_llm(message.message)
+    echo_language_output = db.query(User).filter(User.id == user["id"]).first()
+        
+    ai_chat = await chat_llm(message.message, language=echo_language_output.echo_language_output) # type: ignore
     
     print("AI chat response:", ai_chat)
     print("User chat message:", message.message)

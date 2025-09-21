@@ -34,14 +34,17 @@ if not pc.has_index(index_name): # type: ignore
 index = pc.Index(index_name) # type: ignore
 
 
-async def speak_to_llm(text, voice):
+async def speak_to_llm(text, voice, language):
     # 1. Split text if long (optional for user query, but fine for docs)
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
     splitted_text = text_splitter.split_text(text)
+    
+    print("echo language:", language)
 
     # 2. Build prompt for LLM
     message = [
-        ("system", "You are Echo, a professional AI voice assistant."),
+        ("system", f"""You are Echo, a professional AI voice assistant.
+                      You must ALWAYS respond in {language}, regardless of input language. """),
         ("human", "{query}")
     ]
 
@@ -75,9 +78,12 @@ async def speak_to_llm(text, voice):
     return ai_response, speech_response
 
 
-async def chat_llm(message: str):
+async def chat_llm(message: str, language: str):
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
     splitted_text = text_splitter.split_text(message)
+    
+    print("echo language:", language)
+
     
     embedding = OllamaEmbeddings(model="llama3.1")
     vector_store = PineconeVectorStore(index=index, embedding=embedding)
@@ -87,8 +93,9 @@ async def chat_llm(message: str):
     
     messages = [
         ("system", f"""You are Echo, a professional AI voice assistant.
-         
-                    Here is my previous conversation with you:
+                        You must ALWAYS respond in {language}, regardless of input language. 
+                        Here is the conversation so far (but translate your response into {language}):
+
                     
                     {[previous_chat.page_content for previous_chat in previous_chat]}
          """),

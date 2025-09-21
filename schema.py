@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from typing import Optional
 
 class User(BaseModel):
     fullname: str = Field(min_length= 3)
@@ -50,3 +51,7 @@ class ai_chat(BaseModel):
             }
         }
     }
+    
+class encho_customize(BaseModel):
+    voice: Optional[str] = Field(min_length=2)
+    echo_language_output: Optional[str] = Field(min_length=2)

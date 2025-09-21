@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer
 
 
-from router import auth, chat
+from router import auth, chat, customization
 import models
 
 from database import engine
@@ -25,6 +25,7 @@ models.Base.metadata.create_all(bind=engine)
 
 app.include_router(auth.router, prefix="/auth", tags=["User Auth"])
 app.include_router(chat.router, prefix="/chat", tags=["Chat"])
+app.include_router(customization.router, prefix="/echo", tags=["Customization"])
 
 
 

@@ -10,3 +10,4 @@ class User(Base):
     password = Column(String)
     voice = Column(String)
     profile_pic = Column(String)
+    echo_language_output = Column(String)
