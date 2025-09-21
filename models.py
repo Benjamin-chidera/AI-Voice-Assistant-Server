@@ -8,3 +8,5 @@ class User(Base):
     fullname = Column(String)
     email = Column(String, unique=True, index=True)
     password = Column(String)
+    voice = Column(String)
+    profile_pic = Column(String)

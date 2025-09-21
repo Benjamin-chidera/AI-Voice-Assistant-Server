@@ -39,3 +39,14 @@ class voice_input(BaseModel):
             }
         }
     }
+    
+class ai_chat(BaseModel):
+    message: str = Field(min_length= 1)
+    
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "message": "How are you?"
+            }
+        }
+    }

@@ -5,9 +5,11 @@ from sqlalchemy.orm import Session
 from typing import Annotated
 from utils.get_current_user import get_current_user
 import io
+from models import User
+import schema
 
 # speak to llm
-from utils.llm_communication import speak_to_llm
+from utils.llm_communication import speak_to_llm, chat_llm
 
 router = APIRouter()
 
@@ -32,16 +34,43 @@ async def communicate(
 ):
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+    
+    user_voice = db.query(User).filter(User.id == user["id"]).first()
+    
+    print("User voice:", user_voice.voice) # type: ignore
 
     # Use file.file which is a file-like object (stream) without saving to disk
     audio_stream = file.file  # type: ignore 
-
+ 
     # Faster Whisper expects a path, numpy array, or file-like object with read()
     segments, _ = model.transcribe(audio_stream)
-    text = " ".join([seg.text for seg in segments])
+    user_text = " ".join([seg.text for seg in segments])
 
-    print("Transcribed text:", text)
+    print("Transcribed user_text:", user_text)
     
-    await speak_to_llm(text)
+    ai_response, speech_response = await speak_to_llm(user_text, voice=user_voice.voice) # type: ignore
 
-    return {"text": text}
+    return {"user_text": user_text,
+            "ai_response": ai_response,
+            "speech_response": speech_response,
+            }
+
+
+@router.post("/chat_with_ai", status_code=status.HTTP_201_CREATED)
+async def chat_with_llm(
+    db: db_dependency,
+    message: schema.ai_chat,
+    user: dict = Depends(get_current_user),
+):
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+    
+    ai_chat = await chat_llm(message.message)
+    
+    print("AI chat response:", ai_chat)
+    print("User chat message:", message.message)
+    
+    return {
+        "ai_chat": ai_chat,
+        "user_chat": message.message
+    }
