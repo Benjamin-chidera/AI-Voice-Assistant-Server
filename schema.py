@@ -1,5 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Optional
+from fastapi import File, UploadFile, Form
+
 
 class User(BaseModel):
     fullname: str = Field(min_length= 3)
@@ -29,6 +31,28 @@ class Login(BaseModel):
             }
         }
     }
+    
+    
+class Update_User(BaseModel):
+    fullname: Optional[str] = Form(None)
+    email: Optional[str] = Form(None)
+    password: Optional[str] = Form(None)
+    confirmPassword: Optional[str] = Form(None)
+    profile_pic: UploadFile = File(...)
+
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "fullname": "John Doe",
+                "email": "johndoe@gmail.com",
+                "confirmPassword": "password123",
+                "password": "password123",
+                # "profile_pic": "https://www.example.com/profile.jpg"
+            }
+        }
+    }
+
     
 class voice_input(BaseModel):
     url: str = Field(min_length= 5)

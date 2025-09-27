@@ -1,11 +1,21 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Path, UploadFile, File, Form
 import schema
 import database
 from sqlalchemy.orm import Session
-from typing import Annotated
+from typing import Annotated, Optional
 from datetime import datetime, timedelta
 from models import User
 from utils.access_token import create_access_token
+from utils.get_current_user import get_current_user
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+# cloudinary
+import cloud
+import cloudinary.uploader
+import cloudinary.api
+from cloud import api_key, api_secret, cloud_name
 
 # auth
 from passlib.context import CryptContext
@@ -20,9 +30,19 @@ def get_db():
     try:
         yield db
     finally:
-        db.close()
+        db.close() 
         
 db_dependency = Annotated[Session, Depends(get_db)]
+user_dependency = Annotated[dict, Depends(get_current_user)]
+
+# cloudinary config
+cloudinary.config( 
+  cloud_name = cloud_name[0], 
+  api_key = api_key[0],
+  api_secret = api_secret[0],
+  secure = True
+)
+
 
 @router.post("/register", status_code = status.HTTP_201_CREATED)
 async def register(create_user: schema.User, db: db_dependency):
@@ -100,7 +120,64 @@ async def get_user(id: int, db: db_dependency):
     userData = {
         "id": user.id,
         "fullname": user.fullname,
-        "email": user.email 
+        "email": user.email,
+        "profile_pic": user.profile_pic,
     }
      
     return userData
+
+@router.patch("/user/{id}", status_code=status.HTTP_200_OK)
+async def update_user_infor(
+    db: db_dependency,
+    id: int = Path(ge=1),
+    fullname: Optional[str] = Form(None),
+    email: Optional[str] = Form(None),
+    password: Optional[str] = Form(None),
+    confirmPassword: Optional[str] = Form(None),
+    profile_pic: UploadFile = File(None),
+):
+    user = db.query(User).filter(User.id == id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Update fullname
+    if fullname:
+        user.fullname = fullname # type: ignore
+
+    # Update email with uniqueness check
+    if email:
+        existing_user = db.query(User).filter(User.email == email).first()
+        if existing_user and existing_user.id != user.id: # type: ignore
+            raise HTTPException(status_code=400, detail="Email already in use")
+        user.email = email # type: ignore
+
+    # Update password
+    if password:
+        if not confirmPassword or password != confirmPassword:
+            raise HTTPException(status_code=400, detail="Passwords do not match")
+        user.password = bycrypt.hash(password) # type: ignore
+
+    # Upload profile picture
+    if profile_pic:
+        result = cloudinary.uploader.upload(
+            profile_pic.file,
+            folder=f"user_{user.id}",
+            public_id="profile_pic",
+            overwrite=True,
+            resource_type="image"
+        )
+        user.profile_pic = result["secure_url"]
+
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    return {
+        "message": "User profile updated successfully",
+        "user": {
+            "id": user.id,
+            "fullname": user.fullname,
+            "email": user.email,
+            "profile_pic": user.profile_pic,
+        }
+    }
