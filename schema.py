@@ -65,6 +65,9 @@ class voice_input(BaseModel):
         }
     }
     
+class AIRequest(BaseModel):
+    ai_response: str = Field(min_length= 1)
+    
 class ai_chat(BaseModel):
     message: str = Field(min_length= 1)
     

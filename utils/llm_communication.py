@@ -54,15 +54,16 @@ async def speak_to_llm(text, voice, language):
     ai_response = chain.invoke({"query": text})
     print("Response from LLM:", ai_response)
 
-    # 3. Convert response to speech (uncomment when ready)
-    # with client.audio.speech.with_streaming_response.create(
-    #     model="gpt-4o-mini-tts",
-    #     voice=voice,
-    #     input=ai_response,
-    # ) as response:
-    #     audio_bytes = response.read() 
-    # speech_response = base64.b64encode(audio_bytes).decode("utf-8")
-    speech_response = "dfff" # temporary placeholder
+    #  3. Convert response to speech (streaming)
+    # def audio_stream_fn():
+    #     with client.audio.speech.with_streaming_response.create(
+    #         model="gpt-4o-mini-tts",
+    #         voice=voice,
+    #         input=ai_response,
+    #     ) as response:
+    #         for chunk in response.iter_bytes():  # stream chunks instead of .read()
+    #             yield chunk
+    # speech_response = "dfff" # temporary placeholder
 
     # 4. Save both USER and AI response into Pinecone
     embedding = OllamaEmbeddings(model="llama3.1")
@@ -75,7 +76,7 @@ async def speak_to_llm(text, voice, language):
 
     vector_store.add_texts([doc], metadatas=[{"role": "conversation"}])
 
-    return ai_response, speech_response
+    return ai_response
 
 
 async def chat_llm(message: str, language: str):
@@ -105,7 +106,7 @@ async def chat_llm(message: str, language: str):
     chat = ChatPromptTemplate.from_messages(messages)
     chain = chat | llm | StrOutputParser()
 
-    ai_response = chain.invoke({"message": message})
+    ai_response = chain.invoke({"message": message}) 
     print("Response from LLM:", ai_response)
     
     
@@ -116,3 +117,14 @@ async def chat_llm(message: str, language: str):
     vector_store.add_texts([doc], metadatas=[{"role": "conversation"}])
 
     return ai_response
+
+
+
+# def audio_stream_fn(voice, ai_response):
+#         with client.audio.speech.with_streaming_response.create(
+#             model="gpt-4o-mini-tts",
+#             voice=voice,
+#             input=ai_response,
+#         ) as response:
+#             for chunk in response.iter_bytes():  # stream chunks instead of .read()
+#                 yield chunk

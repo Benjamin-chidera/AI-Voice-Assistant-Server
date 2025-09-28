@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # cloudinary
-import cloud
+import cloudinary
 import cloudinary.uploader
 import cloudinary.api
 from cloud import api_key, api_secret, cloud_name
@@ -161,8 +161,8 @@ async def update_user_infor(
     if profile_pic:
         result = cloudinary.uploader.upload(
             profile_pic.file,
-            folder=f"user_{user.id}",
-            public_id="profile_pic",
+            folder=f"echo-user-pic",
+            public_id=f"user_{user.id}",
             overwrite=True,
             resource_type="image"
         )
