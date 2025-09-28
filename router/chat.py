@@ -10,7 +10,8 @@ from models import User
 import schema
 
 # speak to llm
-from utils.llm_communication import speak_to_llm, chat_llm, audio_stream_fn
+from utils.llm_communication import speak_to_llm, chat_llm
+# audio_stream_fn
 
 router = APIRouter()
 
