@@ -41,7 +41,11 @@ async def customize_echo(user:user_dependency, db: db_dependency, echo_request: 
     if echo_request.echo_language_output: 
         user_id.echo_language_output = echo_request.echo_language_output # type: ignore
         
+    if echo_request.voice_identifier:
+        
+        user_id.voice_identifier = echo_request.voice_identifier # type: ignore
+        
     db.commit()
     db.refresh(user_id)
     
-    return {"message": "Customization updated successfully", "voice": user_id.voice, "echo_language_output": user_id.echo_language_output} # type: ignore
+    return {"message": "Customization updated successfully", "voice": user_id.voice, "echo_language_output": user_id.echo_language_output, "voice_identifier": user_id.voice_identifier} # type: ignore

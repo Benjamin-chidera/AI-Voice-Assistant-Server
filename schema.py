@@ -82,3 +82,5 @@ class ai_chat(BaseModel):
 class encho_customize(BaseModel):
     voice: Optional[str] = Field(min_length=2)
     echo_language_output: Optional[str] = Field(min_length=2)
+    voice_identifier: Optional[str] = Field(min_length=2)
+    
