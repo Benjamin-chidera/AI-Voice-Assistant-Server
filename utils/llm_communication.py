@@ -34,7 +34,7 @@ if not pc.has_index(index_name): # type: ignore
 index = pc.Index(index_name) # type: ignore
 
 
-async def speak_to_llm(text, voice, language):
+async def speak_to_llm(text, voice, language, user_name):
     # 1. Split text if long (optional for user query, but fine for docs)
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
     splitted_text = text_splitter.split_text(text)
@@ -44,26 +44,17 @@ async def speak_to_llm(text, voice, language):
     # 2. Build prompt for LLM
     message = [
         ("system", f"""You are Echo, a professional AI voice assistant.
-                      You must ALWAYS respond in {language}, regardless of input language. """),
+                    The user name is {user_name}.
+                    You must ALWAYS respond in {language}, regardless of input language. """),
         ("human", "{query}")
     ]
 
     chat = ChatPromptTemplate.from_messages(message)
     chain = chat | llm | StrOutputParser()
 
-    ai_response = chain.invoke({"query": text})
+    ai_response = chain.invoke({"query": text}) 
     print("Response from LLM:", ai_response)
 
-    #  3. Convert response to speech (streaming)
-    # def audio_stream_fn():
-    #     with client.audio.speech.with_streaming_response.create(
-    #         model="gpt-4o-mini-tts",
-    #         voice=voice,
-    #         input=ai_response,
-    #     ) as response:
-    #         for chunk in response.iter_bytes():  # stream chunks instead of .read()
-    #             yield chunk
-    # speech_response = "dfff" # temporary placeholder
 
     # 4. Save both USER and AI response into Pinecone
     embedding = OllamaEmbeddings(model="llama3.1")
@@ -79,7 +70,7 @@ async def speak_to_llm(text, voice, language):
     return ai_response
 
 
-async def chat_llm(message: str, language: str):
+async def chat_llm(message: str, language: str, user_name: str):
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
     splitted_text = text_splitter.split_text(message)
     
@@ -95,6 +86,7 @@ async def chat_llm(message: str, language: str):
     messages = [
         ("system", f"""You are Echo, a professional AI voice assistant.
                         You must ALWAYS respond in {language}, regardless of input language. 
+                         The user name is {user_name}.
                         Here is the conversation so far (but translate your response into {language}):
 
                     
@@ -117,14 +109,3 @@ async def chat_llm(message: str, language: str):
     vector_store.add_texts([doc], metadatas=[{"role": "conversation"}])
 
     return ai_response
-
-
-
-# def audio_stream_fn(voice, ai_response):
-#         with client.audio.speech.with_streaming_response.create(
-#             model="gpt-4o-mini-tts",
-#             voice=voice,
-#             input=ai_response,
-#         ) as response:
-#             for chunk in response.iter_bytes():  # stream chunks instead of .read()
-#                 yield chunk
