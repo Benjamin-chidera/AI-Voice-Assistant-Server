@@ -26,26 +26,33 @@ user_dependency = Annotated[dict, Depends(get_current_user)]
 @router.patch("/customize/{id}", status_code=status.HTTP_200_OK)
 async def customize_echo(user:user_dependency, db: db_dependency, echo_request: schema.encho_customize, id: int = Path(ge=1)):
     
-    if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+    try:
+        if not user:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
     
-    user_id = db.query(User).filter(User.id == id).first()
+        user_id = db.query(User).filter(User.id == id).first()
+        
+        if not user_id:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        
+        #  update customization
+        if echo_request.voice:
+            user_id.voice = echo_request.voice # type: ignore
+            
+        if echo_request.echo_language_output: 
+            user_id.echo_language_output = echo_request.echo_language_output # type: ignore
+            
+        if echo_request.voice_identifier:
+            
+            user_id.voice_identifier = echo_request.voice_identifier # type: ignore
+            
+        db.commit()
+        db.refresh(user_id)
+        
+        return {"message": "Customization updated successfully", "voice": user_id.voice, "echo_language_output": user_id.echo_language_output, "voice_identifier": user_id.voice_identifier} # type: ignore
     
-    if not user_id:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    except HTTPException:
+        raise
     
-    #  update customization
-    if echo_request.voice:
-        user_id.voice = echo_request.voice # type: ignore
-        
-    if echo_request.echo_language_output: 
-        user_id.echo_language_output = echo_request.echo_language_output # type: ignore
-        
-    if echo_request.voice_identifier:
-        
-        user_id.voice_identifier = echo_request.voice_identifier # type: ignore
-        
-    db.commit()
-    db.refresh(user_id)
-    
-    return {"message": "Customization updated successfully", "voice": user_id.voice, "echo_language_output": user_id.echo_language_output, "voice_identifier": user_id.voice_identifier} # type: ignore
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Unexpected server error: {str(e)}")
