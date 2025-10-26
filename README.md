@@ -23,21 +23,23 @@ A **FastAPI-based backend** for the **Echo Voice Assistant**, providing **user a
 
 ## 🧱 Project Structure
 
-├── main.py # Entry point of the application
-├── database.py # Database configuration and connection
-├── models.py # SQLAlchemy models for the database
-├── router/ # API route modules
-│ ├── auth.py # User authentication routes
-│ ├── chat.py # Chat-related routes
-│ ├── customization.py # Customization-related routes
-├── schema.py # Pydantic models for request/response validation
-├── utils/ # Utility modules
-│ ├── access_token.py # JWT token generation and validation
-│ ├── get_current_user.py # User authentication helpers
-│ ├── llm_communication.py # AI communication logic
-├── requirement.txt # Python dependencies
-├── README.md # Project documentation
-└── .env # Environment variables (not included in version control)
+```text
+.
+├──                          # Entry point of the application
+├──                      # Database configuration and connection
+├──                        # SQLAlchemy models for the database
+├── router/                         # API route modules
+│   ├── auth.py                     # User authentication routes
+│   ├── chat.py                     # Chat-related routes
+│   └── customization.py            # Customization-related routes
+├──                        # Pydantic models for request/response validation
+├── utils/                          # Utility modules
+│   ├── access_token.py             # JWT token generation and validation
+│   ├── get_current_user.py         # User authentication helpers
+│   └── llm_communication.py        # AI communication logic
+├──                  # Python dependencies
+├──                        # Project documentation
+└── .env                            # Environment variables (not included in version control)
 
 ## ⚙️ Prerequisites
 
