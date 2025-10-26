@@ -45,7 +45,7 @@ A **FastAPI-based backend** for the **Echo Voice Assistant**, providing **user a
 
 Before running the project, make sure you have:
 
-- 🐍 **Python 3.9+**
+- 🐍 **Python 3.13.7+**
 - 🛢️ **MySQL database**
 - 🧠 **Pinecone** account for vector storage → [https://www.pinecone.io/](https://www.pinecone.io/)
 - ☁️ **Cloudinary** account for media uploads → [https://cloudinary.com/](https://cloudinary.com/)
