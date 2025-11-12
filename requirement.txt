@@ -13,3 +13,4 @@ langchain-openai
 langchain-ollama
 openai
 uvicorn[standard]
+fastapi[standard]
