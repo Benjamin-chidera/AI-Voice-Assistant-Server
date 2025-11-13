@@ -37,11 +37,17 @@ user_dependency = Annotated[dict, Depends(get_current_user)]
 
 # cloudinary config
 cloudinary.config( 
-  cloud_name = cloud_name[0], 
-  api_key = api_key[0],
-  api_secret = api_secret[0],
+  cloud_name = os.getenv("CLOUDINARY_NAME"), 
+  api_key = os.getenv("CLOUDINARY_API_KEY"),
+  api_secret = os.getenv("CLOUDINARY_API_SECRET"),
   secure = True
 )
+# cloudinary.config( 
+#   cloud_name = cloud_name[0], 
+#   api_key = api_key[0],
+#   api_secret = api_secret[0],
+#   secure = True
+# )
 
 
 @router.post("/register", status_code = status.HTTP_201_CREATED)
