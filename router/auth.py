@@ -15,7 +15,7 @@ load_dotenv()
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
-from cloud import api_key, api_secret, cloud_name
+# from cloud import api_key, api_secret, cloud_name
 
 # auth
 from passlib.context import CryptContext
