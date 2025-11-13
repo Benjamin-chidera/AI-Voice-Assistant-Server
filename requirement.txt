@@ -16,3 +16,4 @@ uvicorn[standard]
 fastapi[standard]
 cloudinary
 pinecone
+langchain_pinecone
